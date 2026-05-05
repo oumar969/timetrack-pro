@@ -91,10 +91,10 @@ export default function AdminDashboard() {
         {tab === 'overview' && (
           <div>
             <div className="stats-row">
-              <div className="stat-card"><div className="stat-label">Aktive nu</div><div className="stat-val green">{activeNow.length}</div></div>
-              <div className="stat-card"><div className="stat-label">Timer i dag</div><div className="stat-val purple">{analytics ? (analytics.todayMs/3600000).toFixed(1) : '...'}</div></div>
-              <div className="stat-card"><div className="stat-label">Medarbejdere</div><div className="stat-val">{employees.length}</div></div>
-              <div className="stat-card"><div className="stat-label">Vagtskift total</div><div className="stat-val orange">{sessions.length}</div></div>
+              <div className="stat-card green"><div className="stat-label">Aktive nu</div><div className="stat-val green">{activeNow.length}</div></div>
+              <div className="stat-card blue"><div className="stat-label">Timer i dag</div><div className="stat-val blue">{analytics ? (analytics.todayMs/3600000).toFixed(1) : '...'}</div></div>
+              <div className="stat-card navy"><div className="stat-label">Medarbejdere</div><div className="stat-val">{employees.length}</div></div>
+              <div className="stat-card yellow"><div className="stat-label">Vagtskift total</div><div className="stat-val yellow">{sessions.length}</div></div>
             </div>
 
             <div className="section-title">Aktive nu <span className="badge">{activeNow.length}</span></div>
@@ -206,11 +206,11 @@ export default function AdminDashboard() {
               <div className="chart-title">Timer pr. dag — seneste 7 dage</div>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
-                  <XAxis dataKey="date" stroke="#6b6b80" tick={{ fontFamily: 'DM Mono', fontSize: 12 }} />
-                  <YAxis stroke="#6b6b80" tick={{ fontFamily: 'DM Mono', fontSize: 12 }} />
-                  <Tooltip contentStyle={{ background: '#1a1a24', border: '1px solid #2a2a3a', borderRadius: 8, fontFamily: 'DM Mono' }} />
-                  <Bar dataKey="timer" fill="#00ff88" radius={[6,6,0,0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" stroke="#6b7280" tick={{ fontFamily: 'Nunito', fontSize: 13, fontWeight: 700 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontFamily: 'Nunito', fontSize: 13, fontWeight: 700 }} />
+                  <Tooltip contentStyle={{ background: '#fff', border: '2px solid #e5e7eb', borderRadius: 12, fontFamily: 'Nunito', fontWeight: 700 }} />
+                  <Bar dataKey="timer" fill="#2563eb" radius={[8,8,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
