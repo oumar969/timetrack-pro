@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/timetrack-pro/static/css/main.55a3b98f.css",
+    "main.js": "/timetrack-pro/static/js/main.c08a68b4.js",
+    "static/js/453.64aababc.chunk.js": "/timetrack-pro/static/js/453.64aababc.chunk.js",
+    "index.html": "/timetrack-pro/index.html",
+    "main.55a3b98f.css.map": "/timetrack-pro/static/css/main.55a3b98f.css.map",
+    "main.c08a68b4.js.map": "/timetrack-pro/static/js/main.c08a68b4.js.map",
+    "453.64aababc.chunk.js.map": "/timetrack-pro/static/js/453.64aababc.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.55a3b98f.css",
+    "static/js/main.c08a68b4.js"
+  ]
+}
