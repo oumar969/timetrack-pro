@@ -1,6 +1,51 @@
 # TimeTrack Pro
 
-Tidsregistreringssystem bygget med React + Node/Express + PostgreSQL (MVC arkitektur).
+Tidsregistreringssystem bygget med React + Node/Express + PostgreSQL (MVC arkitektur).  
+Designet til at være nemt at bruge — også for ældre medarbejdere: stor tekst, klare knapper og høj kontrast.
+
+## Skærmbilleder
+
+### Stemme ind / ud
+Medarbejderen skriver sit navn og personlige kode for at stemme ind eller ud. Uret viser den aktuelle tid, og knappen skifter automatisk fra grøn (ind) til rød (ud).
+
+![Stemme ind](docs/screenshots/01-clockin.png)
+
+---
+
+### Admin login
+Lederen logger ind med brugernavn og kodeord for at få adgang til dashboardet.
+
+![Admin login](docs/screenshots/02-admin-login.png)
+
+---
+
+### Dashboard — Overblik
+Viser nøgletal øverst (aktive nu, timer i dag, antal medarbejdere, vagtskift), aktive medarbejdere med ind-tidspunkt, og en oversigt over alle medarbejdere.
+
+![Dashboard overblik](docs/screenshots/03-dashboard-overview.png)
+
+---
+
+### Dashboard — Medarbejdere
+Admin kan tilføje nye medarbejdere (navn + kode) og se alle eksisterende med deres status. Slet-knap på hvert kort.
+
+![Medarbejdere](docs/screenshots/04-employees.png)
+
+---
+
+### Dashboard — Historik
+Komplet log over alle vagtskift med filtrering på medarbejder og dato. Viser ind-tid, ud-tid og samlet arbejdstid.
+
+![Historik](docs/screenshots/05-history.png)
+
+---
+
+### Dashboard — Analyse
+Søjlediagram over timer pr. dag de seneste 7 dage, samt medarbejder-rangering for ugen med gennemsnitlig daglig arbejdstid.
+
+![Analyse](docs/screenshots/06-analytics.png)
+
+---
 
 ## Stack
 - **Frontend**: React, React Router, Recharts, Axios
@@ -37,6 +82,8 @@ npm install
 npm start
 ```
 
+Åbn http://localhost:3000
+
 ## API Endpoints
 
 | Method | Route | Beskrivelse | Auth |
@@ -51,5 +98,5 @@ npm start
 | GET | /api/analytics/week | Ugentlig analyse | JWT |
 
 ## Default login
-- Admin: `admin` / `admin123`
-- Demo medarbejdere: Jonas Hansen (1234), Sara Nielsen (5678), Mikkel Larsen (9012)
+- **Admin:** `admin` / `admin123`
+- **Demo medarbejdere:** Jonas Hansen (1234), Sara Nielsen (5678), Mikkel Larsen (9012)
