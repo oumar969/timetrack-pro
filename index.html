@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeTrack Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f; --surface:#111118; --surface2:#1a1a24; --border:#2a2a3a;
+    --accent:#00ff88; --accent2:#7c3aed; --danger:#ff4444; --warning:#ffaa00;
+    --text:#e8e8f0; --muted:#6b6b80;
+    --font-display:'Syne',sans-serif; --font-mono:'DM Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-display);min-height:100vh;overflow-x:hidden;}
+  .screen{display:none;min-height:100vh;}
+  .screen.active{display:flex;flex-direction:column;}
+
+  /* HOME */
+  #home{align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 20%,#1a0a2e 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,#001a0e 0%,transparent 60%),var(--bg);}
+  .home-inner{text-align:center;max-width:480px;padding:40px 20px;}
+  .logo{font-size:11px;letter-spacing:.3em;color:var(--accent);text-transform:uppercase;margin-bottom:24px;font-family:var(--font-mono);}
+  .logo-icon{font-size:48px;margin-bottom:16px;display:block;}
+  h1.title{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;line-height:1.05;margin-bottom:12px;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .subtitle{color:var(--muted);font-size:.95rem;margin-bottom:48px;line-height:1.6;}
+  .home-buttons{display:flex;flex-direction:column;gap:12px;width:100%;}
+  .btn-primary{background:var(--accent);color:#000;border:none;padding:16px 32px;font-family:var(--font-display);font-size:1rem;font-weight:700;border-radius:12px;cursor:pointer;transition:all .2s;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,136,.3);}
+  .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border);padding:14px 32px;font-family:var(--font-display);font-size:.95rem;font-weight:600;border-radius:12px;cursor:pointer;transition:all .2s;}
+  .btn-secondary:hover{border-color:var(--accent2);color:var(--accent2);}
+  .ticker{margin-top:48px;font-family:var(--font-mono);font-size:.75rem;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;gap:24px;justify-content:center;}
+  .ticker span{color:var(--accent);}
+
+  /* CLOCKIN */
+  #clockin{background:var(--bg);align-items:center;justify-content:center;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;margin:20px;}
+  .card-header{margin-bottom:32px;}
+  .card-header h2{font-size:1.6rem;font-weight:700;margin-bottom:4px;}
+  .card-header p{color:var(--muted);font-size:.9rem;}
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono);}
+  .field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-family:var(--font-mono);font-size:1rem;outline:none;transition:border-color .2s;}
+  .field input:focus{border-color:var(--accent);}
+  .field input::placeholder{color:var(--muted);}
+  .status-msg{border-radius:10px;padding:12px 16px;font-size:.9rem;margin-bottom:20px;display:none;}
+  .status-msg.success{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--accent);display:block;}
+  .status-msg.error{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:var(--danger);display:block;}
+  .status-msg.warning{background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.3);color:var(--warning);display:block;}
+  .btn-full{width:100%;padding:16px;font-size:1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:var(--font-display);transition:all .2s;}
+  .btn-in{background:var(--accent);color:#000;}
+  .btn-in:hover{box-shadow:0 6px 24px rgba(0,255,136,.3);transform:translateY(-1px);}
+  .btn-out{background:var(--danger);color:#fff;}
+  .btn-out:hover{box-shadow:0 6px 24px rgba(255,68,68,.3);transform:translateY(-1px);}
+  .back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--font-display);font-size:.9rem;margin-bottom:24px;padding:0;display:flex;align-items:center;gap:6px;transition:color .2s;}
+  .back-btn:hover{color:var(--text);}
+  .current-time{text-align:center;font-family:var(--font-mono);font-size:2rem;color:var(--accent);margin-bottom:24px;letter-spacing:.05em;}
+  .clocked-in-badge{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);border-radius:8px;padding:8px 14px;font-size:.8rem;color:var(--accent);margin-bottom:16px;font-family:var(--font-mono);text-align:center;display:none;}
+
+  /* ADMIN */
+  #admin{background:var(--bg);}
+  .admin-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .admin-nav .logo-text{font-size:1.1rem;font-weight:700;color:var(--accent);}
+  .nav-tabs{display:flex;gap:4px;}
+  .nav-tab{background:none;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font-display);font-size:.85rem;font-weight:600;color:var(--muted);transition:all .2s;}
+  .nav-tab.active{background:var(--surface2);color:var(--text);}
+  .admin-content{padding:24px;max-width:1200px;margin:0 auto;width:100%;}
+  .admin-tab{display:none;}
+  .admin-tab.active{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;}
+  .stat-label{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono);}
+  .stat-value{font-size:2rem;font-weight:800;font-family:var(--font-mono);}
+  .stat-value.green{color:var(--accent);}
+  .stat-value.purple{color:#a78bfa;}
+  .stat-value.orange{color:var(--warning);}
+  .section-title{font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .badge{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:.75rem;color:var(--muted);font-family:var(--font-mono);}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;overflow-x:auto;margin-bottom:32px;}
+  table{width:100%;border-collapse:collapse;font-size:.875rem;min-width:500px;}
+  thead{background:var(--surface2);}
+  th{padding:12px 16px;text-align:left;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);font-weight:500;border-bottom:1px solid var(--border);}
+  td{padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.85rem;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--surface2);}
+  .online-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:6px;box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite;}
+  .offline-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .filter-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+  .filter-row select,.filter-row input[type=date]{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font-mono);font-size:.85rem;outline:none;}
+  .filter-row select:focus,.filter-row input[type=date]:focus{border-color:var(--accent);}
+  .emp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px;}
+  .emp-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .2s;}
+  .emp-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .emp-card h3{font-size:1rem;font-weight:700;margin-bottom:4px;}
+  .emp-stats{display:flex;gap:16px;margin-top:12px;}
+  .emp-stat{font-family:var(--font-mono);font-size:.8rem;color:var(--muted);}
+  .emp-stat span{color:var(--text);font-weight:600;}
+  #adminlogin{background:var(--bg);align-items:center;justify-content:center;}
+  .chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;}
+  .chart-title{font-size:.9rem;font-weight:600;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);}
+  .bar-chart{display:flex;align-items:flex-end;gap:8px;height:140px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;}
+  .bar{width:100%;background:linear-gradient(to top,var(--accent2),var(--accent));border-radius:6px 6px 0 0;min-height:4px;transition:height .6s cubic-bezier(.4,0,.2,1);}
+  .bar-label{font-family:var(--font-mono);font-size:.65rem;color:var(--muted);}
+  @media(max-width:600px){.nav-tabs{display:none;}.admin-content{padding:16px;}.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="home-inner">
+    <span class="logo-icon">&#9201;</span>
+    <div class="logo">TimeTrack Pro</div>
+    <h1 class="title">Styr paa timerne</h1>
+    <p class="subtitle">Simpel tidsregistrering til medarbejdere. Stem ind og ud pa sekunder - admin ser alt i realtid.</p>
+    <div class="home-buttons">
+      <button class="btn-primary" onclick="showScreen('clockin')">Medarbejder - Stem ind/ud</button>
+      <button class="btn-secondary" onclick="showScreen('adminlogin')">Admin-panel</button>
+    </div>
+    <div class="ticker">
+      Aktive nu: <span id="activeCount">0</span> &nbsp;|&nbsp; Timer i dag: <span id="todayHours">0.0</span> &nbsp;|&nbsp; Medarbejdere: <span id="totalEmp">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- CLOCK IN/OUT -->
+<div id="clockin" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;padding:20px;">
+    <div class="card">
+      <button class="back-btn" onclick="showScreen('home')">&#8592; Tilbage</button>
+      <div class="current-time" id="clockDisplay">00:00:00</div>
+      <div class="card-header">
+        <h2>Tidsregistrering</h2>
+        <p>Skriv dit navn og kode for at stemme ind eller ud</p>
+      </div>
+      <div class="clocked-in-badge" id="clockedBadge">Du er i ojeblikket stemplet ind</div>
+      <div id="statusMsg" class="status-msg"></div>
+      <div class="field">
+        <label>Navn</label>
+        <input type="text" id="empName" placeholder="Dit fulde navn" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Kode</label>
+        <input type="password" id="empCode" placeholder="Din personlige kode" autocomplete="off">
+      </div>
+      <button class="btn-full btn-in" id="clockBtn" onclick="handleClockAction()">Stem ind</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminlogin" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;padding:20px;">
+    <div class="card">
+      <button class="back-btn" onclick="showScreen('home')">&#8592; Tilbage</button>
+      <div class="card-header">
+        <h2>Admin-adgang</h2>
+        <p>Log ind for at se dashboard</p>
+      </div>
+      <div id="adminMsg" class="status-msg"></div>
+      <div class="field">
+        <label>Admin kode</label>
+        <input type="password" id="adminCode" placeholder="Indtast admin kode">
+      </div>
+      <button class="btn-full btn-primary" onclick="adminLogin()">Abn dashboard</button>
+      <p style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:16px;font-family:var(--font-mono);">Standard kode: <strong style="color:var(--accent)">admin123</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin" class="screen">
+  <nav class="admin-nav">
+    <div class="logo-text">&#9201; TimeTrack</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('overview',this)">Overblik</button>
+      <button class="nav-tab" onclick="switchTab('employees',this)">Medarbejdere</button>
+      <button class="nav-tab" onclick="switchTab('history',this)">Historik</button>
+      <button class="nav-tab" onclick="switchTab('analytics',this)">Analyse</button>
+    </div>
+    <button class="btn-secondary" style="padding:8px 16px;font-size:.85rem;" onclick="showScreen('home')">Luk</button>
+  </nav>
+  <div class="admin-content">
+
+    <!-- OVERVIEW -->
+    <div id="tab-overview" class="admin-tab active">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="section-title">Aktive nu <span class="badge" id="activeBadge">0</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Status</th><th>Navn</th><th>Stemplet ind</th><th>Timer i dag</th><th>Handling</th></tr></thead>
+          <tbody id="activeTable"></tbody>
+        </table>
+      </div>
+      <div class="section-title">Alle medarbejdere</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Status</th><th>Navn</th><th>Total timer</th><th>Timer i dag</th><th>Seneste aktivitet</th></tr></thead>
+          <tbody id="allEmpTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div id="tab-employees" class="admin-tab">
+      <div class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span>Medarbejdere</span>
+        <button class="btn-primary" style="padding:10px 20px;font-size:.85rem;" onclick="showAddEmployee()">+ Tilfoj ny</button>
+      </div>
+      <div id="addEmpForm" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;">
+        <h3 style="margin-bottom:20px;font-size:1rem;">Ny medarbejder</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="field"><label>Navn</label><input type="text" id="newEmpName" placeholder="Fuldt navn"></div>
+          <div class="field"><label>Kode</label><input type="text" id="newEmpCode" placeholder="F.eks. 1234"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button class="btn-full btn-in" style="max-width:160px;" onclick="addEmployee()">Gem</button>
+          <button onclick="document.getElementById('addEmpForm').style.display='none'" style="max-width:120px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:12px;cursor:pointer;padding:12px;font-family:var(--font-display);font-weight:600;font-size:.9rem;">Annuller</button>
+        </div>
+      </div>
+      <div id="empCards" class="emp-cards"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="tab-history" class="admin-tab">
+      <div class="section-title">Historik</div>
+      <div class="filter-row">
+        <select id="filterEmp" onchange="renderHistory()"><option value="">Alle medarbejdere</option></select>
+        <input type="date" id="filterDate" onchange="renderHistory()">
+        <button class="btn-secondary" style="padding:10px 16px;font-size:.85rem;" onclick="clearFilters()">Nulstil</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Navn</th><th>Dato</th><th>Ind</th><th>Ud</th><th>Varighed</th></tr></thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="tab-analytics" class="admin-tab">
+      <div class="section-title">Ugentlig analyse</div>
+      <div class="chart-wrap">
+        <div class="chart-title">Timer pr. dag (seneste 7 dage)</div>
+        <div class="bar-chart" id="weekChart"></div>
+      </div>
+      <div class="section-title">Medarbejder-rangering (denne uge)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Navn</th><th>Timer denne uge</th><th>Gns. pr. dag</th><th>Dage aktiv</th></tr></thead>
+          <tbody id="rankTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ADMIN_CODE='admin123';
+const STORAGE_KEY='timetrack_v1';
+
+function loadData(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{employees:{},sessions:[]};}
+  catch{return{employees:{},sessions:[]};}
+}
+function saveData(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}
+
+function seedDemo(){
+  const d=loadData();
+  if(Object.keys(d.employees).length>0)return;
+  const emps=[{name:'Jonas Hansen',code:'1234'},{name:'Sara Nielsen',code:'5678'},{name:'Mikkel Larsen',code:'9012'}];
+  emps.forEach(e=>{
+    const key=toKey(e.name);
+    d.employees[key]={name:e.name,code:e.code,clockedIn:false,clockInTime:null};
+  });
+  const now=Date.now(),day=86400000;
+  [{key:'jonas_hansen',days:1,dur:8.5},{key:'sara_nielsen',days:1,dur:7.2},{key:'mikkel_larsen',days:1,dur:6.8},
+   {key:'jonas_hansen',days:2,dur:8.1},{key:'sara_nielsen',days:2,dur:9.0},{key:'jonas_hansen',days:3,dur:7.5},{key:'mikkel_larsen',days:3,dur:8.3}
+  ].forEach(s=>{
+    const inT=now-s.days*day+8*3600000;
+    d.sessions.push({empKey:s.key,name:d.employees[s.key].name,clockIn:inT,clockOut:inT+s.dur*3600000,duration:s.dur*3600000});
+  });
+  saveData(d);
+}
+
+function toKey(name){return name.toLowerCase().replace(/\s+/g,'_');}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='admin')renderAdmin();
+  if(id==='home')updateTicker();
+}
+
+// Clock display
+setInterval(()=>{
+  const el=document.getElementById('clockDisplay');
+  if(el)el.textContent=new Date().toLocaleTimeString('da-DK');
+},1000);
+
+document.getElementById('empCode').addEventListener('keydown',e=>{if(e.key==='Enter')handleClockAction();});
+document.getElementById('adminCode').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin();});
+
+document.getElementById('empName').addEventListener('input',function(){
+  const key=toKey(this.value.trim());
+  const d=loadData();
+  const emp=d.employees[key];
+  const badge=document.getElementById('clockedBadge');
+  const btn=document.getElementById('clockBtn');
+  if(emp&&emp.clockedIn){badge.style.display='block';btn.className='btn-full btn-out';btn.textContent='Stem ud';}
+  else{badge.style.display='none';btn.className='btn-full btn-in';btn.textContent='Stem ind';}
+});
+
+function handleClockAction(){
+  const name=document.getElementById('empName').value.trim();
+  const code=document.getElementById('empCode').value.trim();
+  const msg=document.getElementById('statusMsg');
+  msg.className='status-msg';
+  if(!name||!code){showMsg(msg,'error','Udfyld baade navn og kode.');return;}
+  const d=loadData();
+  const key=toKey(name);
+  const emp=d.employees[key];
+  if(!emp){showMsg(msg,'error','Medarbejder ikke fundet. Kontakt admin.');return;}
+  if(emp.code!==code){showMsg(msg,'error','Forkert kode. Prøv igen.');return;}
+  if(!emp.clockedIn){
+    emp.clockedIn=true;emp.clockInTime=Date.now();saveData(d);
+    document.getElementById('clockedBadge').style.display='block';
+    document.getElementById('clockBtn').className='btn-full btn-out';
+    document.getElementById('clockBtn').textContent='Stem ud';
+    showMsg(msg,'success','God arbejdslyst, '+emp.name+'! Stemplet ind kl. '+new Date().toLocaleTimeString('da-DK'));
+  }else{
+    const dur=Date.now()-emp.clockInTime;
+    d.sessions.push({empKey:key,name:emp.name,clockIn:emp.clockInTime,clockOut:Date.now(),duration:dur});
+    emp.clockedIn=false;emp.clockInTime=null;saveData(d);
+    document.getElementById('clockedBadge').style.display='none';
+    document.getElementById('clockBtn').className='btn-full btn-in';
+    document.getElementById('clockBtn').textContent='Stem ind';
+    showMsg(msg,'warning','Farvel '+emp.name+'! Du arbejdede i '+formatDur(dur)+'.');
+  }
+  document.getElementById('empCode').value='';
+  updateTicker();
+}
+
+function showMsg(el,type,text){el.className='status-msg '+type;el.textContent=text;}
+
+function adminLogin(){
+  const code=document.getElementById('adminCode').value;
+  if(code===ADMIN_CODE){showScreen('admin');document.getElementById('adminCode').value='';}
+  else{showMsg(document.getElementById('adminMsg'),'error','Forkert admin kode.');}
+}
+
+function renderAdmin(){
+  renderStats();renderActiveTable();renderAllEmpTable();
+  renderEmployeeCards();renderHistory();renderAnalytics();populateEmpFilter();
+}
+
+function renderStats(){
+  const d=loadData();
+  const active=Object.values(d.employees).filter(e=>e.clockedIn).length;
+  const todayMs=getTodaySessions(d).reduce((a,s)=>a+s.duration,0);
+  const totalEmp=Object.keys(d.employees).length;
+  const weekMs=getWeekSessions(d).reduce((a,s)=>a+s.duration,0);
+  document.getElementById('statsGrid').innerHTML=
+    '<div class="stat-card"><div class="stat-label">Aktive nu</div><div class="stat-value green">'+active+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Timer i dag</div><div class="stat-value purple">'+(todayMs/3600000).toFixed(1)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Timer denne uge</div><div class="stat-value orange">'+(weekMs/3600000).toFixed(1)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">Medarbejdere</div><div class="stat-value">'+totalEmp+'</div></div>';
+  document.getElementById('activeBadge').textContent=active;
+}
+
+function renderActiveTable(){
+  const d=loadData();
+  const tbody=document.getElementById('activeTable');
+  const active=Object.entries(d.employees).filter(([,e])=>e.clockedIn);
+  if(!active.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Ingen aktive medarbejdere</td></tr>';return;}
+  tbody.innerHTML=active.map(([key,e])=>{
+    const dur=Date.now()-e.clockInTime;
+    return '<tr><td><span class="online-dot"></span>Aktiv</td><td style="font-weight:600">'+e.name+'</td>'+
+      '<td>'+new Date(e.clockInTime).toLocaleTimeString('da-DK')+'</td>'+
+      '<td style="color:var(--accent)">'+formatDur(dur)+'</td>'+
+      '<td><button onclick="forceOut(\''+key+'\')" style="background:var(--danger);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;">Stem ud</button></td></tr>';
+  }).join('');
+}
+
+function forceOut(key){
+  const d=loadData();const emp=d.employees[key];if(!emp||!emp.clockedIn)return;
+  const dur=Date.now()-emp.clockInTime;
+  d.sessions.push({empKey:key,name:emp.name,clockIn:emp.clockInTime,clockOut:Date.now(),duration:dur});
+  emp.clockedIn=false;emp.clockInTime=null;saveData(d);renderAdmin();
+}
+
+function renderAllEmpTable(){
+  const d=loadData();
+  const tbody=document.getElementById('allEmpTable');
+  const emps=Object.entries(d.employees);
+  if(!emps.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Ingen medarbejdere</td></tr>';return;}
+  tbody.innerHTML=emps.map(([key,e])=>{
+    const total=getTotalHours(d,key);
+    const today=getTodayHours(d,key);
+    const last=getLastActivity(d,key);
+    return '<tr><td>'+(e.clockedIn?'<span class="online-dot"></span>Aktiv':'<span class="offline-dot"></span>Offline')+'</td>'+
+      '<td style="font-weight:600">'+e.name+'</td><td>'+total.toFixed(2)+' t</td>'+
+      '<td style="color:'+(today>0?'var(--accent)':'var(--muted)')+'">'+today.toFixed(2)+' t</td>'+
+      '<td style="color:var(--muted)">'+last+'</td></tr>';
+  }).join('');
+}
+
+function renderEmployeeCards(){
+  const d=loadData();
+  const container=document.getElementById('empCards');
+  const emps=Object.entries(d.employees);
+  if(!emps.length){container.innerHTML='<p style="color:var(--muted)">Ingen medarbejdere endnu.</p>';return;}
+  container.innerHTML=emps.map(([key,e])=>{
+    const total=getTotalHours(d,key);
+    const today=getTodayHours(d,key);
+    const sessions=d.sessions.filter(s=>s.empKey===key).length;
+    return '<div class="emp-card">'+
+      '<div style="display:flex;justify-content:space-between;align-items:start;">'+
+      '<div><h3>'+e.name+'</h3><div style="font-family:var(--font-mono);font-size:.75rem;color:var(--muted);margin-top:2px;">Kode: '+e.code+'</div></div>'+
+      '<button onclick="deleteEmployee(\''+key+'\')" style="background:none;border:1px solid var(--border);color:var(--danger);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.75rem;">Slet</button>'+
+      '</div><div class="emp-stats">'+
+      '<div class="emp-stat">Total: <span>'+total.toFixed(1)+'t</span></div>'+
+      '<div class="emp-stat">I dag: <span style="color:var(--accent)">'+today.toFixed(1)+'t</span></div>'+
+      '<div class="emp-stat">Vagter: <span>'+sessions+'</span></div>'+
+      '</div>'+(e.clockedIn?'<div style="margin-top:12px;font-size:.75rem;color:var(--accent);font-family:var(--font-mono);">Aktiv siden '+new Date(e.clockInTime).toLocaleTimeString('da-DK')+'</div>':'')+
+      '</div>';
+  }).join('');
+}
+
+function showAddEmployee(){document.getElementById('addEmpForm').style.display='block';document.getElementById('newEmpName').focus();}
+function addEmployee(){
+  const name=document.getElementById('newEmpName').value.trim();
+  const code=document.getElementById('newEmpCode').value.trim();
+  if(!name||!code){alert('Udfyld navn og kode');return;}
+  const d=loadData();const key=toKey(name);
+  if(d.employees[key]){alert('Medarbejder med dette navn findes allerede');return;}
+  d.employees[key]={name,code,clockedIn:false,clockInTime:null};
+  saveData(d);
+  document.getElementById('newEmpName').value='';document.getElementById('newEmpCode').value='';
+  document.getElementById('addEmpForm').style.display='none';
+  renderAdmin();updateTicker();
+}
+function deleteEmployee(key){
+  if(!confirm('Slet denne medarbejder? Historik bevares.'))return;
+  const d=loadData();delete d.employees[key];saveData(d);renderAdmin();updateTicker();
+}
+
+function renderHistory(){
+  const d=loadData();
+  const empFilter=document.getElementById('filterEmp').value;
+  const dateFilter=document.getElementById('filterDate').value;
+  let sessions=[...d.sessions].reverse();
+  if(empFilter)sessions=sessions.filter(s=>s.empKey===empFilter);
+  if(dateFilter){const fd=new Date(dateFilter).toDateString();sessions=sessions.filter(s=>new Date(s.clockIn).toDateString()===fd);}
+  const tbody=document.getElementById('historyTable');
+  if(!sessions.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Ingen registreringer</td></tr>';return;}
+  tbody.innerHTML=sessions.slice(0,200).map(s=>
+    '<tr><td style="font-weight:600">'+s.name+'</td>'+
+    '<td>'+new Date(s.clockIn).toLocaleDateString('da-DK')+'</td>'+
+    '<td style="color:var(--accent)">'+new Date(s.clockIn).toLocaleTimeString('da-DK')+'</td>'+
+    '<td style="color:var(--danger)">'+new Date(s.clockOut).toLocaleTimeString('da-DK')+'</td>'+
+    '<td style="font-weight:600">'+formatDur(s.duration)+'</td></tr>'
+  ).join('');
+}
+
+function populateEmpFilter(){
+  const d=loadData();const sel=document.getElementById('filterEmp');const cur=sel.value;
+  sel.innerHTML='<option value="">Alle medarbejdere</option>';
+  Object.entries(d.employees).forEach(([key,e])=>{sel.innerHTML+='<option value="'+key+'"'+(cur===key?' selected':'')+'>'+e.name+'</option>';});
+}
+function clearFilters(){document.getElementById('filterEmp').value='';document.getElementById('filterDate').value='';renderHistory();}
+
+function renderAnalytics(){
+  const d=loadData();
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const date=new Date();date.setDate(date.getDate()-i);
+    const ds=date.toDateString();
+    const ms=d.sessions.filter(s=>new Date(s.clockIn).toDateString()===ds).reduce((a,s)=>a+s.duration,0);
+    days.push({label:['Son','Man','Tir','Ons','Tor','Fre','Lor'][date.getDay()],hours:ms/3600000});
+  }
+  const maxH=Math.max(...days.map(d=>d.hours),1);
+  document.getElementById('weekChart').innerHTML=days.map(day=>
+    '<div class="bar-col">'+
+    '<div style="flex:1;display:flex;align-items:flex-end;width:100%;">'+
+    '<div class="bar" style="height:'+Math.max(day.hours/maxH*100,day.hours>0?4:0)+'%"></div></div>'+
+    '<div class="bar-label">'+day.label+'</div>'+
+    '<div class="bar-label" style="color:var(--accent)">'+(day.hours>0?day.hours.toFixed(1):'')+'</div></div>'
+  ).join('');
+
+  const ws=new Date();ws.setDate(ws.getDate()-7);ws.setHours(0,0,0,0);
+  const empH={};
+  d.sessions.filter(s=>s.clockIn>=ws.getTime()).forEach(s=>{
+    if(!empH[s.name])empH[s.name]={total:0,days:new Set()};
+    empH[s.name].total+=s.duration;empH[s.name].days.add(new Date(s.clockIn).toDateString());
+  });
+  const ranked=Object.entries(empH).sort((a,b)=>b[1].total-a[1].total);
+  const tbody=document.getElementById('rankTable');
+  if(!ranked.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Ingen data denne uge</td></tr>';return;}
+  tbody.innerHTML=ranked.map(([name,data],i)=>
+    '<tr><td style="font-weight:700;color:'+(i===0?'var(--warning)':i===1?'#aaa':'#cd7f32')+'">'+(i===0?'#1':i===1?'#2':'#'+(i+1))+'</td>'+
+    '<td style="font-weight:600">'+name+'</td>'+
+    '<td style="color:var(--accent)">'+(data.total/3600000).toFixed(2)+' t</td>'+
+    '<td>'+(data.total/3600000/data.days.size).toFixed(2)+' t</td>'+
+    '<td>'+data.days.size+' dage</td></tr>'
+  ).join('');
+}
+
+function formatDur(ms){
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  if(h>0)return h+'t '+m+'m '+s+'s';
+  if(m>0)return m+'m '+s+'s';
+  return s+'s';
+}
+function getTodaySessions(d){const t=new Date().toDateString();return d.sessions.filter(s=>new Date(s.clockIn).toDateString()===t);}
+function getWeekSessions(d){const ws=new Date();ws.setDate(ws.getDate()-7);ws.setHours(0,0,0,0);return d.sessions.filter(s=>s.clockIn>=ws.getTime());}
+function getTodayHours(d,key){
+  const t=new Date().toDateString();
+  let ms=d.sessions.filter(s=>s.empKey===key&&new Date(s.clockIn).toDateString()===t).reduce((a,s)=>a+s.duration,0);
+  if(d.employees[key]?.clockedIn)ms+=Date.now()-d.employees[key].clockInTime;
+  return ms/3600000;
+}
+function getTotalHours(d,key){
+  let ms=d.sessions.filter(s=>s.empKey===key).reduce((a,s)=>a+s.duration,0);
+  if(d.employees[key]?.clockedIn)ms+=Date.now()-d.employees[key].clockInTime;
+  return ms/3600000;
+}
+function getLastActivity(d,key){
+  const sessions=d.sessions.filter(s=>s.empKey===key);
+  if(!sessions.length)return '-';
+  const last=Math.max(...sessions.map(s=>s.clockOut));
+  return new Date(last).toLocaleString('da-DK',{dateStyle:'short',timeStyle:'short'});
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='analytics')renderAnalytics();
+  if(name==='history')renderHistory();
+}
+
+function updateTicker(){
+  const d=loadData();
+  document.getElementById('activeCount').textContent=Object.values(d.employees).filter(e=>e.clockedIn).length;
+  document.getElementById('totalEmp').textContent=Object.keys(d.employees).length;
+  const ms=getTodaySessions(d).reduce((a,s)=>a+s.duration,0);
+  document.getElementById('todayHours').textContent=(ms/3600000).toFixed(1);
+}
+
+seedDemo();
+updateTicker();
+setInterval(()=>{if(document.getElementById('admin').classList.contains('active'))renderStats();updateTicker();},5000);
+</script>
+</body>
+</html>
